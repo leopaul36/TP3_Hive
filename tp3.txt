@@ -1,0 +1,16 @@
+--Count first name by origin
+
+USE lschoukroundb;
+SELECT origin, COUNT(name) FROM prenoms LATERAL VIEW EXPLODE(SPLIT(regexp_replace(origins,', ',','),'[\,]')) adTable AS origin GROUP BY origin;
+
+--Count number of first name by number of origin
+
+USE lschoukroundb;
+SELECT nb_orig, COUNT(*) FROM (SELECT (length(regexp_replace(origins,'[^,]','')) + 1) as nb_orig FROM prenoms) subtable GROUP BY nb_orig;
+
+--Proportion (in%) of male or female
+
+USE lschoukroundb;
+
+SELECT a.sex, a.nb/b.tot * 100.0 FROM (SELECT sex, COUNT(*) as nb FROM prenoms LATERAL VIEW EXPLODE(SPLIT(regexp_replace(sexes,', ',','),'[\,]')) adTable as sex GROUP BY sex)a,(SELECT COUNT(sex) as tot FROM prenoms LATERAL VIEW EXPLODE(SPLIT(regexp_replace(sexes,', ',','),'[\,]')) adTable as sex)b;
+
